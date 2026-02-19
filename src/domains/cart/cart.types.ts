@@ -1,4 +1,4 @@
-import type { Product } from '../product/product.types'
+import type { Product } from '@/api/schemas/product'
 
 export interface CartItem {
   product: Product
