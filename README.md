@@ -8,15 +8,15 @@ A modern, type-safe checkout system built with **TanStack Start**, **TanStack Qu
 
 ### Tech Stack
 
-| Layer          | Technology                                    |
-| -------------- | --------------------------------------------- |
-| Framework      | TanStack Start (SSR + file-based routing)     |
-| Data Fetching  | TanStack Query (React Query)                  |
-| Validation     | Zod (runtime schema validation)               |
-| Styling        | TailwindCSS v4                                |
-| Language       | TypeScript (strict mode)                      |
-| Build Tool     | Vite 7                                        |
-| Server Runtime | Nitro                                         |
+| Layer          | Technology                                |
+| -------------- | ----------------------------------------- |
+| Framework      | TanStack Start (SSR + file-based routing) |
+| Data Fetching  | TanStack Query (React Query)              |
+| Validation     | Zod (runtime schema validation)           |
+| Styling        | TailwindCSS v4                            |
+| Language       | TypeScript (strict mode)                  |
+| Build Tool     | Vite 7                                    |
+| Server Runtime | Nitro                                     |
 
 ### Folder Structure
 
@@ -121,15 +121,15 @@ src/
 
 ## ⚖️ Tradeoffs
 
-| Decision                              | Benefit                                        | Tradeoff                                                                      |
-| ------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------- |
-| React Context for cart                | Zero extra dependencies, simple mental model    | Could hit performance issues with very frequent updates (not a concern here)  |
-| Zod validation on every API response  | Catches bad data early, self-documenting schemas | Small runtime overhead per request (negligible for this scale)                |
-| Separate `domains/` folder            | Pure, testable logic                           | More files/folders to navigate vs. colocating everything in `features/`       |
-| FakeStore API as mock                 | Quick setup, realistic data shape              | No control over data; can't test edge cases server-side                       |
-| TanStack Start (SSR framework)        | SSR, server functions, full-stack capabilities | Newer ecosystem, fewer community examples compared to Next.js                 |
-| TailwindCSS v4                        | Utility-first, fast iteration                  | Verbose class names, can be harder to read in complex layouts                 |
-| `localStorage` cart persistence       | Works offline, no server dependency            | Not synced across devices, lost on storage clear                              |
+| Decision                             | Benefit                                          | Tradeoff                                                                     |
+| ------------------------------------ | ------------------------------------------------ | ---------------------------------------------------------------------------- |
+| React Context for cart               | Zero extra dependencies, simple mental model     | Could hit performance issues with very frequent updates (not a concern here) |
+| Zod validation on every API response | Catches bad data early, self-documenting schemas | Small runtime overhead per request (negligible for this scale)               |
+| Separate `domains/` folder           | Pure, testable logic                             | More files/folders to navigate vs. colocating everything in `features/`      |
+| FakeStore API as mock                | Quick setup, realistic data shape                | No control over data; can't test edge cases server-side                      |
+| TanStack Start (SSR framework)       | SSR, server functions, full-stack capabilities   | Newer ecosystem, fewer community examples compared to Next.js                |
+| TailwindCSS v4                       | Utility-first, fast iteration                    | Verbose class names, can be harder to read in complex layouts                |
+| `localStorage` cart persistence      | Works offline, no server dependency              | Not synced across devices, lost on storage clear                             |
 
 ---
 
@@ -203,15 +203,15 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 📦 Scripts
 
-| Script         | Description                        |
-| -------------- | ---------------------------------- |
-| `pnpm dev`     | Start dev server on port 3000      |
-| `pnpm build`   | Production build                   |
-| `pnpm preview` | Preview production build           |
-| `pnpm test`    | Run tests (Vitest)                 |
-| `pnpm lint`    | Lint with ESLint                   |
-| `pnpm format`  | Check formatting with Prettier     |
-| `pnpm check`   | Fix formatting + lint              |
+| Script         | Description                    |
+| -------------- | ------------------------------ |
+| `pnpm dev`     | Start dev server on port 3000  |
+| `pnpm build`   | Production build               |
+| `pnpm preview` | Preview production build       |
+| `pnpm test`    | Run tests (Vitest)             |
+| `pnpm lint`    | Lint with ESLint               |
+| `pnpm format`  | Check formatting with Prettier |
+| `pnpm check`   | Fix formatting + lint          |
 
 ---
 
@@ -221,28 +221,29 @@ AI assistance (Gemini / Antigravity) was used during this project. Per Mochi's r
 
 ### Where AI was used
 
-| Area | What AI helped with |
-|------|-------------------|
-| Architecture planning | Drafting the initial folder structure and layer separation strategy |
-| Domain modeling guidance | Suggesting the discriminated union pattern for `CartAction` and the strategy pattern for promotions |
-| `cart.logic.ts` bug catch | Flagging that `const existing` inside a `case` without braces causes a lexical declaration error |
-| README | Drafting the initial structure; content was reviewed and adapted |
+| Area                      | What AI helped with                                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------------------------- |
+| Architecture planning     | Drafting the initial folder structure and layer separation strategy                                 |
+| Domain modeling guidance  | Suggesting the discriminated union pattern for `CartAction` and the strategy pattern for promotions |
+| `cart.logic.ts` bug catch | Flagging that `const existing` inside a `case` without braces causes a lexical declaration error    |
+| README                    | Drafting the initial structure; content was reviewed and adapted                                    |
 
 ### Example prompts used
 
 **1. Architecture planning**
-> *"I want you to create an implementation plan for this task — let's make an implementation plan first for folder structure. You can browse the TanStack Start docs for more info."*
+
+> _"I want you to create an implementation plan for this task — let's make an implementation plan first for folder structure. You can browse the TanStack Start docs for more info."_
 
 AI generated a proposed folder structure split across `routes/`, `domains/`, `features/`, `api/`, `lib/`, and `components/`. I reviewed and approved it, then implemented it myself.
 
 **2. Domain modeling guidance**
-> *"Promotions (Extensible Design) — implement promotional rules: 10% off > $20, 15% off > $50, 20% off > $100. Do not hardcode these directly in UI logic. Design your promotion system in a way that allows adding new rules easily, is type-safe, and separates calculation logic from components."*
+
+> _"Promotions (Extensible Design) — implement promotional rules: 10% off > $20, 15% off > $50, 20% off > $100. Do not hardcode these directly in UI logic. Design your promotion system in a way that allows adding new rules easily, is type-safe, and separates calculation logic from components."_
 
 AI suggested the strategy pattern (config-driven rules array + evaluation engine). I wrote the actual implementation myself, using the suggestion as a reference.
 
 **3. README**
-> *"Drafting the initial structure; content was reviewed and adapted"*
+
+> _"Drafting the initial structure; content was reviewed and adapted"_
 
 AI drafted the initial README structure, which I reviewed and adapted to fit my project's needs.
-
-
