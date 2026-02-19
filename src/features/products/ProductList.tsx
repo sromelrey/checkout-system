@@ -21,7 +21,7 @@ export function ProductList() {
     return (
       <div className="p-8 text-center text-red-600 bg-red-50 rounded-lg">
         <p className="font-medium">Error loading products</p>
-        <p className="text-sm mt-1">{(error).message}</p>
+        <p className="text-sm mt-1">{error.message}</p>
       </div>
     )
   }
