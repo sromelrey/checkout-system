@@ -1,21 +1,11 @@
+import type { ProductSeach } from '@/api/schemas/product'
 import { useProductsQuery } from './hooks'
+import { FilterSection } from './FilterSection' // [1] Add imports
+import { Pagination } from './Pagination' // [2] Add imports
 import { ProductCard } from './ProductCard'
 
-export function ProductList() {
-  const { data: products, isLoading, error, isError } = useProductsQuery()
-
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-[350px] bg-gray-100 rounded-lg animate-pulse"
-          />
-        ))}
-      </div>
-    )
-  }
+export function ProductList({ searchParams }: { searchParams: ProductSeach }) {
+  const { data, isLoading, error, isError } = useProductsQuery(searchParams)
 
   if (isError) {
     return (
@@ -26,15 +16,37 @@ export function ProductList() {
     )
   }
 
-  if (!products?.length) {
-    return <p className="text-center text-gray-500 mt-8">No products found.</p>
-  }
-
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </div>
+    <>
+      <FilterSection searchParams={searchParams} />
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-[350px] bg-gray-100 rounded-lg animate-pulse"
+            />
+          ))}
+        </div>
+      ) : !data?.items.length ? (
+        <div className="py-20 text-center">
+          <p className="text-gray-500 text-lg">
+            No products match your search.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {data.items.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
+      {data && (
+        <Pagination
+          currentPage={searchParams.page}
+          totalPages={data.totalPages}
+        />
+      )}
+    </>
   )
 }
