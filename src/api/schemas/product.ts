@@ -13,4 +13,11 @@ export const ProductSchema = z.object({
   }),
 })
 
+export const productSearchSchema = z.object({
+  page: z.number().catch(1),
+  q: z.string().catch(''),
+  category: z.string().catch(''),
+})
+
+export type ProductSeach = z.infer<typeof productSearchSchema>
 export type Product = z.infer<typeof ProductSchema>
