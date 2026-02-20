@@ -2,7 +2,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "eslint.config.js",
+    ".output/eslint.config.js",
     "prettier.config.js",
     "vite.config.js"
   ],

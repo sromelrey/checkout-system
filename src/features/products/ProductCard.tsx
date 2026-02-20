@@ -1,10 +1,13 @@
 import type { Product } from '@/api/schemas/product'
+import { useCart } from '@/domains/cart/cart.context'
 
 interface ProductCardProps {
   product: Product
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { dispatch } = useCart()
+
   return (
     <div className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full bg-white">
       <div className="relative aspect-square mb-4 overflow-hidden rounded-md bg-gray-100">
@@ -33,7 +36,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer active:scale-95"
-            onClick={() => console.log('Add to cart', product.id)}
+            onClick={() => dispatch({ type: 'ADD_ITEM', product })}
           >
             Add to Cart
           </button>
