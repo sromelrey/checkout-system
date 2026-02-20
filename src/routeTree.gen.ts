@@ -9,18 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TestRouteImport } from './routes/test'
-import { Route as AnotherRouteImport } from './routes/another'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CartRouteImport } from './routes/cart'
 import { Route as IndexRouteImport } from './routes/index'
 
-const TestRoute = TestRouteImport.update({
-  id: '/test',
-  path: '/test',
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AnotherRoute = AnotherRouteImport.update({
-  id: '/another',
-  path: '/another',
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -31,48 +31,48 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/another': typeof AnotherRoute
-  '/test': typeof TestRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/another': typeof AnotherRoute
-  '/test': typeof TestRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/another': typeof AnotherRoute
-  '/test': typeof TestRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/another' | '/test'
+  fullPaths: '/' | '/cart' | '/checkout'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/another' | '/test'
-  id: '__root__' | '/' | '/another' | '/test'
+  to: '/' | '/cart' | '/checkout'
+  id: '__root__' | '/' | '/cart' | '/checkout'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AnotherRoute: typeof AnotherRoute
-  TestRoute: typeof TestRoute
+  CartRoute: typeof CartRoute
+  CheckoutRoute: typeof CheckoutRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/test': {
-      id: '/test'
-      path: '/test'
-      fullPath: '/test'
-      preLoaderRoute: typeof TestRouteImport
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/another': {
-      id: '/another'
-      path: '/another'
-      fullPath: '/another'
-      preLoaderRoute: typeof AnotherRouteImport
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -87,8 +87,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AnotherRoute: AnotherRoute,
-  TestRoute: TestRoute,
+  CartRoute: CartRoute,
+  CheckoutRoute: CheckoutRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
