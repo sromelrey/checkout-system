@@ -2,9 +2,13 @@ import { Link } from '@tanstack/react-router'
 import { useCart } from '@/domains/cart/cart.context'
 import { applyBestPromotion } from '@/domains/promotions/promotion.logic'
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
+import { useUpdateQuantity, useRemoveFromCart, useClearCart } from './hooks'
 
 export function CartItems() {
-  const { items, subtotal, dispatch } = useCart()
+  const { items, subtotal } = useCart()
+  const { mutate: updateQuantity } = useUpdateQuantity()
+  const { mutate: removeItem } = useRemoveFromCart()
+  const { mutate: clearCart } = useClearCart()
   const discount = applyBestPromotion(subtotal)
   const finalTotal = subtotal - discount.discountAmount
 
@@ -66,8 +70,7 @@ export function CartItems() {
                   className="p-1 rounded border hover:bg-gray-100 transition-colors disabled:opacity-40 cursor-pointer"
                   disabled={item.quantity <= 1}
                   onClick={() =>
-                    dispatch({
-                      type: 'UPDATE_QUANTITY',
+                    updateQuantity({
                       productId: item.product.id,
                       quantity: item.quantity - 1,
                     })
@@ -81,8 +84,7 @@ export function CartItems() {
                 <button
                   className="p-1 rounded border hover:bg-gray-100 transition-colors cursor-pointer"
                   onClick={() =>
-                    dispatch({
-                      type: 'UPDATE_QUANTITY',
+                    updateQuantity({
                       productId: item.product.id,
                       quantity: item.quantity + 1,
                     })
@@ -100,12 +102,7 @@ export function CartItems() {
               </span>
               <button
                 className="text-red-500 hover:text-red-700 transition-colors p-1 cursor-pointer"
-                onClick={() =>
-                  dispatch({
-                    type: 'REMOVE_ITEM',
-                    productId: item.product.id,
-                  })
-                }
+                onClick={() => removeItem(item.product.id)}
                 title="Remove item"
               >
                 <Trash2 className="w-4 h-4" />
@@ -117,7 +114,7 @@ export function CartItems() {
         {/* Clear Cart */}
         <button
           className="text-sm text-red-500 hover:text-red-700 transition-colors cursor-pointer"
-          onClick={() => dispatch({ type: 'CLEAR_CART' })}
+          onClick={() => clearCart()}
         >
           Clear Cart
         </button>
