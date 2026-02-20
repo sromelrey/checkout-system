@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { useCart } from '@/domains/cart/cart.context'
 import { applyBestPromotion } from '@/domains/promotions/promotion.logic'
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
@@ -151,9 +151,12 @@ export function CartItems() {
             <span>${finalTotal.toFixed(2)}</span>
           </div>
 
-          <button className="w-full mt-6 bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition-colors font-medium cursor-pointer">
+          <Link
+            to="/checkout"
+            className="block w-full mt-6 bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition-colors font-medium cursor-pointer text-center"
+          >
             Checkout
-          </button>
+          </Link>
 
           <Link
             to="/"
