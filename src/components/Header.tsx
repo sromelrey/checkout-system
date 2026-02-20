@@ -1,11 +1,10 @@
 import { Link } from '@tanstack/react-router'
+
 import { useState } from 'react'
-import { Home, Menu, ShoppingCart, X } from 'lucide-react'
-import { useCart } from '@/domains/cart/cart.context'
+import { Home, Menu, X } from 'lucide-react'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const { totalItems } = useCart()
 
   return (
     <>
@@ -26,20 +25,6 @@ export default function Header() {
             />
           </Link>
         </h1>
-        <div className="ml-auto">
-          <Link
-            to="/cart"
-            className="relative p-2 hover:bg-gray-700 rounded-lg transition-colors inline-flex"
-            aria-label="Shopping cart"
-          >
-            <ShoppingCart size={24} />
-            {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                {totalItems > 99 ? '99+' : totalItems}
-              </span>
-            )}
-          </Link>
-        </div>
       </header>
 
       <aside
