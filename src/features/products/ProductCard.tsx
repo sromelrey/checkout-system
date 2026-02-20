@@ -1,12 +1,12 @@
 import type { Product } from '@/api/schemas/product'
-import { useCart } from '@/domains/cart/cart.context'
+import { useAddToCart } from '../cart/hooks'
 
 interface ProductCardProps {
   product: Product
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { dispatch } = useCart()
+  const { mutate: addToCart, isPending } = useAddToCart()
 
   return (
     <div className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full bg-white">
@@ -36,7 +36,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer active:scale-95"
-            onClick={() => dispatch({ type: 'ADD_ITEM', product })}
+            onClick={() => addToCart(product)}
+            disabled={isPending}
           >
             Add to Cart
           </button>
