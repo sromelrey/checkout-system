@@ -66,7 +66,15 @@ export function CheckoutForm() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <p className="text-gray-500 mb-4">Your cart is empty.</p>
-        <Link to="/" className="text-blue-600 hover:text-blue-800">
+        <Link
+          to="/"
+          search={(prev) => ({
+            page: prev.page ?? 1,
+            q: prev.q ?? '',
+            category: prev.category ?? '',
+          })}
+          className="text-blue-600 hover:text-blue-800"
+        >
           Go back to shopping
         </Link>
       </div>
@@ -83,6 +91,11 @@ export function CheckoutForm() {
         <p className="text-gray-500 mb-6">Thank you for your purchase.</p>
         <Link
           to="/"
+          search={(prev) => ({
+            page: prev.page ?? 1,
+            q: prev.q ?? '',
+            category: prev.category ?? '',
+          })}
           className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors"
         >
           Continue Shopping
