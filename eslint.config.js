@@ -20,6 +20,8 @@ export default [
       'prettier.config.js',
       '.output/**',
       'dist/**',
+      'playwright-report/**',
+      'test-results/**',
     ],
   },
 ]

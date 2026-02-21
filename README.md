@@ -215,6 +215,86 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
+## 🛡️ DevOps & CI/CD Setup
+
+This project uses **GitHub Actions** for continuous integration, a **PR template** for consistent pull requests, and **Husky** for Git hook automation.
+
+### GitHub Actions
+
+A CI workflow runs automatically on every push/PR to `main` and `develop`.
+
+**File:** [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+
+**Pipeline steps:**
+
+| Step          | Command                          | Purpose                           |
+| ------------- | -------------------------------- | --------------------------------- |
+| Checkout      | `actions/checkout@v4`            | Clone the repository              |
+| Setup pnpm    | `pnpm/action-setup@v4` (v10)     | Install pnpm package manager      |
+| Setup Node.js | `actions/setup-node@v4` (v22)    | Install Node.js with pnpm caching |
+| Install       | `pnpm install --frozen-lockfile` | Deterministic dependency install  |
+| Format check  | `pnpm format`                    | Verify Prettier formatting        |
+| Lint          | `pnpm lint`                      | Run ESLint                        |
+| Build         | `pnpm build`                     | Type-check + production bundle    |
+| Test          | `pnpm test`                      | Run Vitest test suite             |
+
+**How to set up in a new repo:**
+
+1. Create `.github/workflows/ci.yml` with the workflow above.
+2. Ensure branch protection rules require the `ci` job to pass before merging.
+
+### PR Template
+
+Every new pull request is pre-filled with a structured template.
+
+**File:** [`.github/pull_request_template.md`](.github/pull_request_template.md)
+
+**Template sections:**
+
+- **Summary** – What the PR does.
+- **Type of change** – `feat` / `fix` / `chore` / `refactor` / `docs` / `test`.
+- **Changes** – Key files changed and why.
+- **Checklist** – `pnpm check` passes, `pnpm build` passes, `pnpm test` passes, no `any` types, no direct fetch calls in components.
+- **Screenshots** – Before/after for UI changes.
+
+**How to set up:** Place the file at `.github/pull_request_template.md` — GitHub auto-detects it.
+
+### Husky (Git Hooks)
+
+Husky automates code quality checks before commits and pushes ever reach the remote.
+
+**Install & initialize:**
+
+```bash
+# Install (already in devDependencies)
+pnpm add -D husky lint-staged
+
+# Initialize Husky (creates .husky/ directory)
+pnpm exec husky init
+```
+
+The `"prepare": "husky"` script in `package.json` ensures Husky installs automatically when anyone runs `pnpm install`.
+
+**Hooks configured:**
+
+| Hook         | File                | Command           | What it does                            |
+| ------------ | ------------------- | ----------------- | --------------------------------------- |
+| `pre-commit` | `.husky/pre-commit` | `npx lint-staged` | Runs ESLint + Prettier on staged files  |
+| `pre-push`   | `.husky/pre-push`   | `pnpm test`       | Runs the full test suite before pushing |
+
+**lint-staged config** (in `package.json`):
+
+```json
+"lint-staged": {
+  "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
+  "*.{json,md,css}": ["prettier --write"]
+}
+```
+
+This ensures only staged files are linted/formatted, keeping commits fast.
+
+---
+
 ## 🤖 AI Usage Disclosure
 
 AI assistance (Gemini / Antigravity) was used during this project. Per Mochi's requirements, here is exactly where and how.
@@ -226,6 +306,8 @@ AI assistance (Gemini / Antigravity) was used during this project. Per Mochi's r
 | Architecture planning     | Drafting the initial folder structure and layer separation strategy                                 |
 | Domain modeling guidance  | Suggesting the discriminated union pattern for `CartAction` and the strategy pattern for promotions |
 | `cart.logic.ts` bug catch | Flagging that `const existing` inside a `case` without braces causes a lexical declaration error    |
+| CI/CD & dev tooling       | Setting up Husky pre-commit/pre-push hooks, GitHub Actions CI pipeline, and PR template             |
+| Unit & E2E testing        | Planning and implementing Vitest + RTL unit tests and Playwright E2E tests                          |
 | README                    | Drafting the initial structure; content was reviewed and adapted                                    |
 
 ### Example prompts used
@@ -242,7 +324,19 @@ AI generated a proposed folder structure split across `routes/`, `domains/`, `fe
 
 AI suggested the strategy pattern (config-driven rules array + evaluation engine). I wrote the actual implementation myself, using the suggestion as a reference.
 
-**3. README**
+**3. CI/CD & dev tooling**
+
+> _"Let's integrate Husky for pre-commit hooks, GitHub Actions for CI, and a PR template. Set up Husky with lint-staged on pre-commit (ESLint + Prettier on staged files) and run tests on pre-push. Create a GitHub Actions workflow that runs format check, lint, build, and test on every PR to main and develop. Also add a PR template with summary, type of change, changes list, and a checklist."_
+
+AI generated the `.husky/pre-commit`, `.husky/pre-push`, `.github/workflows/ci.yml`, and `.github/pull_request_template.md` files. I reviewed the configuration, adjusted branch targets, and verified the pipeline locally before merging.
+
+**4. Unit & E2E testing**
+
+> _"Let's implement Unit tests (Vitest + RTL) and E2E tests using Playwright. Create an implementation plan — cover all domain logic (cart reducer, promotions engine), Zod schema validation, React components with Testing Library, and E2E flows for product listing, cart management, and the full checkout flow."_
+
+AI generated the implementation plan with test file structure, test cases per function, and Playwright config. I reviewed the plan, approved the scope, and then implemented the tests with AI assistance.
+
+**5. README**
 
 > _"Drafting the initial structure; content was reviewed and adapted"_
 
