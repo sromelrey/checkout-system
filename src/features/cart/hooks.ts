@@ -6,7 +6,7 @@ import {
   updateCartItemQuantity,
   removeFromCartServer,
   clearCartServer,
-} from '@/api/services/cart'
+} from '@/server/cart'
 import type { Product } from '@/api/schemas/product'
 
 export function useAddToCart() {
@@ -15,7 +15,10 @@ export function useAddToCart() {
   const addToast = useToastStore((s) => s.addToast)
 
   return useMutation({
-    mutationFn: (product: Product) => syncCartToServer(product),
+    mutationFn: (product: Product) =>
+      syncCartToServer({
+        data: { productId: product.id, quantity: 1 },
+      }),
 
     onMutate: async (product) => {
       addItem(product)
@@ -42,7 +45,7 @@ export function useUpdateQuantity() {
     }: {
       productId: number
       quantity: number
-    }) => updateCartItemQuantity(productId, quantity),
+    }) => updateCartItemQuantity({ data: { productId, quantity } }),
 
     onMutate: async ({ productId, quantity }) => {
       const oldQuantity = items.find(
@@ -71,7 +74,8 @@ export function useRemoveFromCart() {
   const addToast = useToastStore((s) => s.addToast)
 
   return useMutation({
-    mutationFn: (productId: number) => removeFromCartServer(productId),
+    mutationFn: (productId: number) =>
+      removeFromCartServer({ data: productId }),
 
     onMutate: async (productId) => {
       const itemToRestore = items.find((i) => i.product.id === productId)

@@ -30,7 +30,7 @@ test.describe('Cart Management', () => {
     await page.locator('button:has-text("Add to Cart")').first().click()
 
     // Navigate to cart
-    await page.goto('/cart')
+    await page.locator('a[aria-label="Shopping cart"]').click()
 
     // Should see cart items (not the empty message)
     await expect(page.locator('text="Order Summary"')).toBeVisible()
@@ -44,7 +44,7 @@ test.describe('Cart Management', () => {
     await page.locator('button:has-text("Add to Cart")').first().click()
 
     // Go to cart
-    await page.goto('/cart')
+    await page.locator('a[aria-label="Shopping cart"]').click()
     await expect(page.locator('text="Order Summary"')).toBeVisible()
 
     // The + button is inside the quantity controls flex div (.flex.items-center.gap-2)
@@ -69,7 +69,7 @@ test.describe('Cart Management', () => {
     await page.locator('button:has-text("Add to Cart")').first().click()
 
     // Go to cart
-    await page.goto('/cart')
+    await page.locator('a[aria-label="Shopping cart"]').click()
     await expect(page.locator('text="Order Summary"')).toBeVisible()
 
     // Click the remove/trash button
@@ -92,7 +92,7 @@ test.describe('Cart Management', () => {
     await addButtons.nth(1).click()
 
     // Go to cart
-    await page.goto('/cart')
+    await page.locator('a[aria-label="Shopping cart"]').click()
     await expect(page.locator('text="Order Summary"')).toBeVisible()
 
     // Click Clear Cart
