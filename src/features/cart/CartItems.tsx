@@ -1,11 +1,12 @@
 import { Link } from '@tanstack/react-router'
-import { useCart } from '@/domains/cart/cart.context'
+import { useCartStore } from '@/store/cart.store'
 import { applyBestPromotion } from '@/domains/promotions/promotion.logic'
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
 import { useUpdateQuantity, useRemoveFromCart, useClearCart } from './hooks'
 
 export function CartItems() {
-  const { items, subtotal } = useCart()
+  const items = useCartStore((s) => s.items)
+  const subtotal = useCartStore((s) => s.getSubtotal())
   const { mutate: updateQuantity } = useUpdateQuantity()
   const { mutate: removeItem } = useRemoveFromCart()
   const { mutate: clearCart } = useClearCart()
@@ -24,6 +25,7 @@ export function CartItems() {
         </p>
         <Link
           to="/"
+          search={{ page: 1, q: '', category: '' }}
           className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium"
         >
           Continue Shopping
@@ -157,6 +159,7 @@ export function CartItems() {
 
           <Link
             to="/"
+            search={{ page: 1, q: '', category: '' }}
             className="block text-center mt-3 text-sm text-blue-600 hover:text-blue-800 transition-colors"
           >
             Continue Shopping

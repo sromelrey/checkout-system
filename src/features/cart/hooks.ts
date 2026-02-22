@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
-import { useCart } from '@/domains/cart/cart.context'
-import { useToast } from '@/domains/toast/toast.context'
+import { useCartStore } from '@/store/cart.store'
+import { useToastStore } from '@/store/toast.store'
 import {
   syncCartToServer,
   updateCartItemQuantity,
@@ -10,28 +10,30 @@ import {
 import type { Product } from '@/api/schemas/product'
 
 export function useAddToCart() {
-  const { dispatch } = useCart()
-  const { addToast } = useToast()
+  const addItem = useCartStore((s) => s.addItem)
+  const removeItem = useCartStore((s) => s.removeItem)
+  const addToast = useToastStore((s) => s.addToast)
 
   return useMutation({
     mutationFn: (product: Product) => syncCartToServer(product),
 
     onMutate: async (product) => {
-      dispatch({ type: 'ADD_ITEM', product })
+      addItem(product)
       addToast(`Added ${product.title} to cart`, 'success')
       return { product }
     },
 
     onError: (_error, product) => {
-      dispatch({ type: 'REMOVE_ITEM', productId: product.id })
+      removeItem(product.id)
       addToast(`Failed to sync ${product.title}. Item removed.`, 'error')
     },
   })
 }
 
 export function useUpdateQuantity() {
-  const { dispatch, items } = useCart()
-  const { addToast } = useToast()
+  const items = useCartStore((s) => s.items)
+  const updateQuantityAction = useCartStore((s) => s.updateQuantity)
+  const addToast = useToastStore((s) => s.addToast)
 
   return useMutation({
     mutationFn: ({
@@ -47,18 +49,14 @@ export function useUpdateQuantity() {
         (i) => i.product.id === productId,
       )?.quantity
 
-      dispatch({ type: 'UPDATE_QUANTITY', productId, quantity })
+      updateQuantityAction(productId, quantity)
 
       return { productId, oldQuantity }
     },
 
     onError: (_error, _variables, context) => {
       if (context?.oldQuantity !== undefined) {
-        dispatch({
-          type: 'UPDATE_QUANTITY',
-          productId: context.productId,
-          quantity: context.oldQuantity,
-        })
+        updateQuantityAction(context.productId, context.oldQuantity)
       }
       addToast('Failed to update quantity. Rolled back.', 'error')
     },
@@ -66,8 +64,11 @@ export function useUpdateQuantity() {
 }
 
 export function useRemoveFromCart() {
-  const { dispatch, items } = useCart()
-  const { addToast } = useToast()
+  const items = useCartStore((s) => s.items)
+  const removeItemAction = useCartStore((s) => s.removeItem)
+  const addItem = useCartStore((s) => s.addItem)
+  const updateQuantityAction = useCartStore((s) => s.updateQuantity)
+  const addToast = useToastStore((s) => s.addToast)
 
   return useMutation({
     mutationFn: (productId: number) => removeFromCartServer(productId),
@@ -75,7 +76,7 @@ export function useRemoveFromCart() {
     onMutate: async (productId) => {
       const itemToRestore = items.find((i) => i.product.id === productId)
 
-      dispatch({ type: 'REMOVE_ITEM', productId })
+      removeItemAction(productId)
       addToast('Item removed', 'info')
 
       return { itemToRestore }
@@ -83,7 +84,11 @@ export function useRemoveFromCart() {
 
     onError: (_error, _variables, context) => {
       if (context?.itemToRestore) {
-        dispatch({ type: 'ADD_ITEM', product: context.itemToRestore.product })
+        addItem(context.itemToRestore.product)
+        updateQuantityAction(
+          context.itemToRestore.product.id,
+          context.itemToRestore.quantity,
+        )
       }
       addToast('Failed to remove item. Restored.', 'error')
     },
@@ -91,8 +96,11 @@ export function useRemoveFromCart() {
 }
 
 export function useClearCart() {
-  const { dispatch, items } = useCart()
-  const { addToast } = useToast()
+  const items = useCartStore((s) => s.items)
+  const clearCartAction = useCartStore((s) => s.clearCart)
+  const addItem = useCartStore((s) => s.addItem)
+  const updateQuantityAction = useCartStore((s) => s.updateQuantity)
+  const addToast = useToastStore((s) => s.addToast)
 
   return useMutation({
     mutationFn: () => clearCartServer(),
@@ -100,7 +108,7 @@ export function useClearCart() {
     onMutate: async () => {
       const itemsToRestore = [...items]
 
-      dispatch({ type: 'CLEAR_CART' })
+      clearCartAction()
       addToast('Cart cleared', 'info')
 
       return { itemsToRestore }
@@ -110,12 +118,8 @@ export function useClearCart() {
       if (context?.itemsToRestore) {
         // Rollback by re-adding all items
         context.itemsToRestore.forEach((item) => {
-          dispatch({ type: 'ADD_ITEM', product: item.product })
-          dispatch({
-            type: 'UPDATE_QUANTITY',
-            productId: item.product.id,
-            quantity: item.quantity,
-          })
+          addItem(item.product)
+          updateQuantityAction(item.product.id, item.quantity)
         })
       }
       addToast('Failed to clear cart. Restored.', 'error')

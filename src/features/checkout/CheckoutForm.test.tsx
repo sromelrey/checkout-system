@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 
 import { CheckoutForm } from './CheckoutForm'
 import type { Product } from '@/api/schemas/product'
+import { useCartStore } from '@/store/cart.store'
 
 // All vi.mock calls are hoisted — must come before imports
 const mockMutate = vi.fn()
@@ -21,12 +22,6 @@ vi.mock('@tanstack/react-router', () => ({
   ),
 }))
 
-const mockDispatch = vi.fn()
-const mockUseCart = vi.fn()
-vi.mock('@/domains/cart/cart.context', () => ({
-  useCart: () => mockUseCart(),
-}))
-
 const mockProduct: Product = {
   id: 1,
   title: 'Test Product',
@@ -40,20 +35,14 @@ const mockProduct: Product = {
 describe('CheckoutForm', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUseCart.mockReturnValue({
+    useCartStore.setState({
       items: [{ product: mockProduct, quantity: 2 }],
-      subtotal: 59.98,
-      totalItems: 2,
-      dispatch: mockDispatch,
     })
   })
 
   it('renders empty cart message when cart is empty', () => {
-    mockUseCart.mockReturnValue({
+    useCartStore.setState({
       items: [],
-      subtotal: 0,
-      totalItems: 0,
-      dispatch: mockDispatch,
     })
 
     render(<CheckoutForm />)

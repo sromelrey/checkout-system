@@ -1,8 +1,9 @@
 import { X, CheckCircle, AlertCircle, Info } from 'lucide-react'
-import { useToast } from '@/domains/toast/toast.context'
+import { useToastStore } from '@/store/toast.store'
 
 export function ToastContainer() {
-  const { toasts, removeToast } = useToast()
+  const toasts = useToastStore((s) => s.toasts)
+  const removeToast = useToastStore((s) => s.removeToast)
 
   if (toasts.length === 0) return null
 
