@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 
 import { CartItems } from './CartItems'
 import type { Product } from '@/api/schemas/product'
+import { useCartStore } from '@/store/cart.store'
 
 // All mocks must be declared before imports (Vitest hoists vi.mock to top)
 vi.mock('./hooks', () => ({
@@ -16,11 +17,6 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
     <a href={to}>{children}</a>
   ),
-}))
-
-const mockUseCart = vi.fn()
-vi.mock('@/domains/cart/cart.context', () => ({
-  useCart: () => mockUseCart(),
 }))
 
 const mockProduct: Product = {
@@ -46,15 +42,11 @@ const mockProduct2: Product = {
 describe('CartItems', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    useCartStore.setState({ items: [] })
   })
 
   it('renders empty cart message when no items', () => {
-    mockUseCart.mockReturnValue({
-      items: [],
-      subtotal: 0,
-      totalItems: 0,
-      dispatch: vi.fn(),
-    })
+    useCartStore.setState({ items: [] })
 
     render(<CartItems />)
     expect(screen.getByText('Your cart is empty')).toBeInTheDocument()
@@ -62,14 +54,11 @@ describe('CartItems', () => {
   })
 
   it('renders cart items with product info', () => {
-    mockUseCart.mockReturnValue({
+    useCartStore.setState({
       items: [
         { product: mockProduct, quantity: 2 },
         { product: mockProduct2, quantity: 1 },
       ],
-      subtotal: 109.97,
-      totalItems: 3,
-      dispatch: vi.fn(),
     })
 
     render(<CartItems />)
@@ -80,11 +69,8 @@ describe('CartItems', () => {
   })
 
   it('displays order summary section', () => {
-    mockUseCart.mockReturnValue({
+    useCartStore.setState({
       items: [{ product: mockProduct, quantity: 1 }],
-      subtotal: 29.99,
-      totalItems: 1,
-      dispatch: vi.fn(),
     })
 
     render(<CartItems />)
@@ -93,11 +79,8 @@ describe('CartItems', () => {
   })
 
   it('displays discount when subtotal qualifies (> $20)', () => {
-    mockUseCart.mockReturnValue({
+    useCartStore.setState({
       items: [{ product: mockProduct, quantity: 1 }],
-      subtotal: 29.99,
-      totalItems: 1,
-      dispatch: vi.fn(),
     })
 
     render(<CartItems />)
@@ -105,11 +88,8 @@ describe('CartItems', () => {
   })
 
   it('shows Checkout link and Clear Cart button', () => {
-    mockUseCart.mockReturnValue({
+    useCartStore.setState({
       items: [{ product: mockProduct, quantity: 1 }],
-      subtotal: 29.99,
-      totalItems: 1,
-      dispatch: vi.fn(),
     })
 
     render(<CartItems />)

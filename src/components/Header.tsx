@@ -1,11 +1,11 @@
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Home, Menu, ShoppingCart, X } from 'lucide-react'
-import { useCart } from '@/domains/cart/cart.context'
+import { useCartStore } from '@/store/cart.store'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const { totalItems } = useCart()
+  const totalItems = useCartStore((s) => s.getTotalItems())
 
   return (
     <>
