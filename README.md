@@ -12,6 +12,8 @@ A modern, type-safe checkout system built with **TanStack Start**, **TanStack Qu
 | -------------- | ----------------------------------------- |
 | Framework      | TanStack Start (SSR + file-based routing) |
 | Data Fetching  | TanStack Query (React Query)              |
+| Server Layer   | TanStack Start Server Functions (RPC)     |
+| State (Client) | Zustand (with persist middleware)         |
 | Validation     | Zod (runtime schema validation)           |
 | Styling        | TailwindCSS v4                            |
 | Language       | TypeScript (strict mode)                  |
@@ -29,29 +31,32 @@ src/
 │   └── checkout.tsx     # Checkout form + order submission
 │
 ├── domains/             # Pure domain models & business logic
-│   ├── product/         # Product types
-│   ├── cart/            # Cart types, reducer, pure logic
-│   └── promotion/       # Promotion rules & evaluation engine
+│   ├── cart/            # Cart types & pure calculation logic
+│   ├── checkout/        # Checkout types
+│   └── promotions/      # Promotion rules & evaluation engine
 │
 ├── features/            # Feature modules (hooks + components)
 │   ├── products/        # useProductsQuery, ProductList, ProductCard
-│   ├── cart/            # CartContext, CartSummary, CartItem, CartBadge
-│   └── checkout/        # useCheckoutMutation, CheckoutForm, OrderSummary
+│   ├── cart/            # CartItems, cart mutation hooks
+│   └── checkout/        # useCheckoutMutation, CheckoutForm
 │
-├── api/                 # API layer (typed clients + Zod schemas)
-│   ├── client.ts        # Typed fetch wrapper
-│   ├── schemas/         # Zod schemas for API request/response
-│   └── services/        # Service functions (getProducts, submitCheckout)
+├── server/              # TanStack Start Server Functions (RPC)
+│   ├── products.ts      # getProducts, getCategories, getProduct
+│   ├── cart.ts          # syncCartToServer, updateCartItemQuantity, …
+│   └── checkout.ts      # submitCheckout
+│
+├── store/               # Zustand client-side state
+│   ├── cart.store.ts    # Cart state + localStorage persist middleware
+│   └── toast.store.ts   # Toast notification queue
+│
+├── api/                 # Zod schemas (validation only)
+│   └── schemas/         # Zod schemas for API request/response
 │
 ├── components/          # Shared, reusable UI components
-│   ├── layout/          # Header, Footer
-│   ├── ui/              # Button, Input, Card, Badge, Spinner, Alert
-│   └── feedback/        # LoadingState, ErrorState
 │
 └── lib/                 # Shared utilities & configuration
     ├── query-client.ts  # QueryClient factory
-    ├── query-keys.ts    # Centralized query key factory
-    └── constants.ts     # API URLs, config values
+    └── query-keys.ts    # Centralized query key factory
 ```
 
 ---
@@ -68,15 +73,16 @@ src/
 - **Portability** – Domain rules can be shared with a server, CLI, or different UI framework.
 - **Clarity** – When reading `cart.logic.ts`, you know it contains only business rules, never UI concerns.
 
-### 2. React Context + `useReducer` for Cart State
+### 2. Zustand for Cart State
 
-**Decision:** Cart state is managed via React Context with `useReducer`, not an external state library.
+**Decision:** Cart state is managed via **Zustand** with the `persist` middleware, replacing an earlier React Context + `useReducer` implementation.
 
 **Why:**
 
-- Cart is inherently **scoped to the current user session** – it doesn't need a global store that survives across pages (we persist to `localStorage` manually).
-- `useReducer` gives us **predictable state transitions** through a discriminated union of action types, which pairs perfectly with TypeScript.
-- Avoids adding Zustand/Redux as a dependency for a single slice of state.
+- **Atomic selectors** (`useCartStore(s => s.items)`) mean components only re-render when their exact slice of state changes — no unnecessary renders from unrelated cart updates.
+- The **`persist` middleware** handles `localStorage` serialization automatically, with no manual `useEffect` sync required.
+- Stores are **testable without provider wrappers** — `useCartStore.setState({ items: [] })` resets state directly in tests, removing the need to wrap every test component in a `CartProvider`.
+- Clean separation from **server state** (TanStack Query) — Zustand handles only ephemeral client UI state, while Query manages all async server data.
 
 ### 3. Zod for Runtime Validation at the API Boundary
 
@@ -121,67 +127,35 @@ src/
 
 ## ⚖️ Tradeoffs
 
-| Decision                             | Benefit                                          | Tradeoff                                                                     |
-| ------------------------------------ | ------------------------------------------------ | ---------------------------------------------------------------------------- |
-| React Context for cart               | Zero extra dependencies, simple mental model     | Could hit performance issues with very frequent updates (not a concern here) |
-| Zod validation on every API response | Catches bad data early, self-documenting schemas | Small runtime overhead per request (negligible for this scale)               |
-| Separate `domains/` folder           | Pure, testable logic                             | More files/folders to navigate vs. colocating everything in `features/`      |
-| FakeStore API as mock                | Quick setup, realistic data shape                | No control over data; can't test edge cases server-side                      |
-| TanStack Start (SSR framework)       | SSR, server functions, full-stack capabilities   | Newer ecosystem, fewer community examples compared to Next.js                |
-| TailwindCSS v4                       | Utility-first, fast iteration                    | Verbose class names, can be harder to read in complex layouts                |
-| `localStorage` cart persistence      | Works offline, no server dependency              | Not synced across devices, lost on storage clear                             |
+| Decision                             | Benefit                                          | Tradeoff                                                                |
+| ------------------------------------ | ------------------------------------------------ | ----------------------------------------------------------------------- |
+| Zustand for cart state               | Atomic selectors, auto-persist, no providers     | Small extra dependency (~1KB gzipped) vs zero-dep Context approach      |
+| Zod validation on every API response | Catches bad data early, self-documenting schemas | Small runtime overhead per request (negligible for this scale)          |
+| Separate `domains/` folder           | Pure, testable logic                             | More files/folders to navigate vs. colocating everything in `features/` |
+| FakeStore API as mock                | Quick setup, realistic data shape                | No control over data; can't test edge cases server-side                 |
+| TanStack Start Server Functions      | Type-safe RPC, API secrets stay server-side      | Newer ecosystem, fewer community examples compared to Next.js patterns  |
+| TailwindCSS v4                       | Utility-first, fast iteration                    | Verbose class names, can be harder to read in complex layouts           |
+| `localStorage` cart persistence      | Works offline, no server dependency              | Not synced across devices, lost on storage clear                        |
 
 ---
 
 ## 📈 How I Would Scale This
 
-### Short-Term (Multi-Page E-Commerce)
-
-- **Add authentication** – Protect checkout with auth middleware, persist cart per user server-side.
-- **Server-side cart** – Move cart state from `localStorage` to a database-backed API. Use TanStack Start server functions to keep the cart synced.
-- **Product pagination + filtering** – Use TanStack Query's `useInfiniteQuery` for paginated product lists with search/category filters.
-- **Optimistic updates** – Apply cart changes optimistically via `useMutation`'s `onMutate` for instant UI feedback.
-
-### Medium-Term (Team & Complexity)
-
-- **Feature flags** – Wrap promotions and checkout variants behind feature flags for A/B testing.
-- **Component library extraction** – Move `components/ui/` into a separate package for cross-project reuse.
-- **E2E testing** – Add Playwright tests for critical checkout flows (add to cart → checkout → order confirmation).
-- **Error monitoring** – Integrate Sentry for runtime error tracking (the Vite config already excludes Sentry from Nitro's bundle).
-- **i18n** – Add internationalization with `react-intl` or `next-intl` equivalent for TanStack Start.
-
-### Long-Term (Production SaaS)
-
-- **Microservices** – Break the API into separate services (Products, Orders, Promotions) behind an API gateway.
-- **CDN & edge caching** – Deploy with Vercel/Cloudflare, use TanStack Start's SSR for first-paint and TanStack Query's `staleTime` for client-side cache.
-- **Database** – PostgreSQL with Prisma for orders and user data, Redis for session/cart caching.
-- **Event-driven** – Order events published to a message queue for inventory updates, email notifications, analytics.
+- **User-scoped cart** – The Server Functions already sync to a cart API (currently with a hardcoded `userId: 1`). Connecting this to an auth session would make it production-ready with no architectural changes — just pass the real user ID from session context.
+- **Authenticated routes** – TanStack Start supports server-side middleware; checkout can be protected server-side before the page even renders.
+- **`useInfiniteQuery` for products** – The current `useProductsQuery` hook uses a simple `useQuery`. Swapping to `useInfiniteQuery` enables scroll-based pagination with minimal changes since the query key factory is already centralized.
+- **CDN + SSR caching** – TanStack Start renders on the server (Nitro), so initial HTML already includes product data. Deploying to Vercel/Cloudflare would immediately benefit from edge caching without code changes.
+- **Database-backed orders** – The checkout Server Function currently posts to FakeStore. Swapping that handler to write to PostgreSQL (via Prisma) would be a one-file change because the client side is completely decoupled.
 
 ---
 
 ## 🔧 What I Would Improve in Production
 
-### Code Quality
-
-- [ ] **100% type coverage** – Audit for any remaining `as` assertions and replace with proper type narrowing.
-- [ ] **Error boundaries** – Add React error boundaries per route segment, not just a global fallback.
-- [ ] **Accessibility audit** – Ensure all interactive elements have ARIA labels, keyboard navigation works, and color contrast meets WCAG AA.
-
-### Performance
-
-- [ ] **Image optimization** – Use responsive images (`<picture>` + `srcset`) or an image CDN for product photos.
-- [ ] **Bundle analysis** – Run `vite-bundle-analyzer` to identify and code-split heavy dependencies.
-- [ ] **Prefetching** – Leverage TanStack Router's `defaultPreload: 'intent'` (already configured) and add query prefetching on hover for product details.
-
-### Security
-
-- [ ] **Input sanitization** – Sanitize user inputs server-side beyond Zod validation (XSS prevention).
-- [ ] **Rate limiting** – Add rate limiting on checkout API to prevent abuse.
-- [ ] **CSRF protection** – Implement CSRF tokens for POST mutations.
-- [ ] **CSP headers** – Add Content Security Policy headers via Nitro middleware.
-
-### DevOps
-
+- **Environment variables** – `VITE_API_URL` is currently a hardcoded fallback. In production this would be a validated `.env` variable using Zod's `z.string().url()` to fail fast on misconfiguration at startup.
+- **Error boundaries** – Currently there is no per-segment error boundary. Adding one per route would isolate failures (e.g., checkout crashing without breaking the product listing).
+- **Rate limiting on Server Functions** – The checkout Server Function has no throttle. Nitro middleware can add this without touching application code.
+- **Prefetching** – `defaultPreload: 'intent'` is already configured in the router. Adding `queryClient.prefetchQuery` on product card hover would give near-instant product detail loads.
+- **Accessibility** – Interactive elements (cart badge, quantity controls) need `aria-label` attributes. Currently relies on visual context only.
 - [ ] **CI/CD pipeline** – GitHub Actions for lint → type-check → test → build → deploy on every PR.
 - [ ] **Staging environment** – Preview deployments on Vercel for PR review.
 - [ ] **Environment variables** – Move API URLs and config to `.env` files with Zod-validated env parsing.
@@ -301,14 +275,15 @@ AI assistance (Gemini / Antigravity) was used during this project. Per Mochi's r
 
 ### Where AI was used
 
-| Area                      | What AI helped with                                                                                 |
-| ------------------------- | --------------------------------------------------------------------------------------------------- |
-| Architecture planning     | Drafting the initial folder structure and layer separation strategy                                 |
-| Domain modeling guidance  | Suggesting the discriminated union pattern for `CartAction` and the strategy pattern for promotions |
-| `cart.logic.ts` bug catch | Flagging that `const existing` inside a `case` without braces causes a lexical declaration error    |
-| CI/CD & dev tooling       | Setting up Husky pre-commit/pre-push hooks, GitHub Actions CI pipeline, and PR template             |
-| Unit & E2E testing        | Planning and implementing Vitest + RTL unit tests and Playwright E2E tests                          |
-| README                    | Drafting the initial structure; content was reviewed and adapted                                    |
+| Area                      | What AI helped with                                                                              |
+| ------------------------- | ------------------------------------------------------------------------------------------------ |
+| Architecture planning     | Drafting the initial folder structure and layer separation strategy                              |
+| Domain modeling guidance  | Suggesting the strategy pattern for the promotions engine                                        |
+| `cart.logic.ts` bug catch | Flagging that `const existing` inside a `case` without braces causes a lexical declaration error |
+| CI/CD & dev tooling       | Setting up Husky pre-commit/pre-push hooks, GitHub Actions CI pipeline, and PR template          |
+| Unit & E2E testing        | Planning and implementing Vitest + RTL unit tests and Playwright E2E tests                       |
+| State management refactor | Migrating from React Context to Zustand stores and from Axios to TanStack Start Server Functions |
+| README                    | Drafting the initial structure; content was reviewed and adapted                                 |
 
 ### Example prompts used
 
