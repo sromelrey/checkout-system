@@ -18,7 +18,7 @@ test.describe('Checkout Flow', () => {
     await page.locator('button:has-text("Add to Cart")').first().click()
 
     // 3. Navigate to cart
-    await page.goto('/cart')
+    await page.locator('a[aria-label="Shopping cart"]').click()
     await expect(page.locator('text="Order Summary"')).toBeVisible()
 
     // 4. Click Checkout
@@ -48,7 +48,7 @@ test.describe('Checkout Flow', () => {
     })
     await page.locator('button:has-text("Add to Cart")').first().click()
 
-    await page.goto('/cart')
+    await page.locator('a[aria-label="Shopping cart"]').click()
     await expect(page.locator('text="Order Summary"')).toBeVisible()
 
     await page.locator('a:has-text("Checkout")').click()
