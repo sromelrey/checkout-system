@@ -7,7 +7,9 @@ test.describe('Product Listing Page', () => {
 
   test('displays product cards', async ({ page }) => {
     // Wait for products to load from API
-    await page.waitForSelector('[class*="rounded-lg"]', { timeout: 15000 })
+    await expect(
+      page.locator('[class*="rounded-lg"][class*="shadow"]').first(),
+    ).toBeVisible()
 
     const productCards = page.locator('[class*="rounded-lg"][class*="shadow"]')
     await expect(productCards.first()).toBeVisible()

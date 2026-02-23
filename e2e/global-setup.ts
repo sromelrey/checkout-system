@@ -60,17 +60,14 @@ export default async function globalSetup() {
     res.end()
   })
 
-  // Start mock server on dynamic port (0) to avoid EADDRINUSE collisions
+  // Start mock server on fixed port 3001 for CI reliability
+  const port = 3001
   await new Promise<void>((resolve) => {
-    server.listen(0, () => resolve())
+    server.listen(port, '127.0.0.1', () => resolve())
   })
 
-  // Get the assigned dynamic port
-  const address = server.address()
-  const port = typeof address === 'string' ? 3001 : address?.port
-
-  // Set the environment variable so the webServer picks it up
-  process.env.VITE_API_URL = `http://localhost:${port}`
+  // Set the environment variable just in case, though webServer has its own config
+  process.env.VITE_API_URL = `http://127.0.0.1:${port}`
 
   // Return a teardown function
   return () => {

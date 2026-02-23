@@ -24,9 +24,9 @@ test.describe('Cart Management', () => {
 
   test('navigate to cart page and see items', async ({ page }) => {
     // Wait for products to load and add an item
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
     await page.locator('button:has-text("Add to Cart")').first().click()
 
     // Navigate to cart
@@ -38,9 +38,9 @@ test.describe('Cart Management', () => {
 
   test('update item quantity in cart', async ({ page }) => {
     // Add a product first
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
     await page.locator('button:has-text("Add to Cart")').first().click()
 
     // Go to cart
@@ -63,9 +63,9 @@ test.describe('Cart Management', () => {
 
   test('remove item from cart', async ({ page }) => {
     // Add a product
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
     await page.locator('button:has-text("Add to Cart")').first().click()
 
     // Go to cart
@@ -84,9 +84,9 @@ test.describe('Cart Management', () => {
 
   test('clear entire cart', async ({ page }) => {
     // Add two products
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
     const addButtons = page.locator('button:has-text("Add to Cart")')
     await addButtons.nth(0).click()
     await addButtons.nth(1).click()
