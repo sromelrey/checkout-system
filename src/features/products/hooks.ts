@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { productKeys } from '@/lib/query-keys'
-import { getCategories, getProducts } from '@/api/services/products'
+import { getCategories, getProducts } from '@/server/products'
 import type { ProductSeach } from '@/api/schemas/product'
 
 const ITEMS_PER_PAGE = 8
@@ -8,7 +8,7 @@ const ITEMS_PER_PAGE = 8
 export const useProductsQuery = (params: ProductSeach) => {
   return useQuery({
     queryKey: [...productKeys.lists(), params],
-    queryFn: getProducts,
+    queryFn: () => getProducts(),
     staleTime: 1000 * 60 * 5, // 5 minutes
 
     select: (products) => {
@@ -39,7 +39,7 @@ export const useProductsQuery = (params: ProductSeach) => {
 export const useCategoriesQuery = () => {
   return useQuery({
     queryKey: ['categories'],
-    queryFn: getCategories,
+    queryFn: () => getCategories(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   })
 }

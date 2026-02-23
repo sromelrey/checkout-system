@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { useCart } from '@/domains/cart/cart.context'
+import { useCartStore } from '@/store/cart.store'
 import { useCheckoutMutation } from './hooks'
 import { CheckoutFormSchema } from '@/domains/checkout/checkout.types'
 import type { CheckoutFormData } from '@/domains/checkout/checkout.types'
@@ -9,7 +9,9 @@ import type { CheckoutRequest } from '@/api/schemas/checkout'
 import { CheckCircle, Loader2 } from 'lucide-react'
 
 export function CheckoutForm() {
-  const { items, subtotal, dispatch } = useCart()
+  const items = useCartStore((s) => s.items)
+  const subtotal = useCartStore((s) => s.getSubtotal())
+  const clearCart = useCartStore((s) => s.clearCart)
   const mutation = useCheckoutMutation()
 
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -58,7 +60,7 @@ export function CheckoutForm() {
     }
 
     mutation.mutate(request, {
-      onSuccess: () => dispatch({ type: 'CLEAR_CART' }),
+      onSuccess: () => clearCart(),
     })
   }
 

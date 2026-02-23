@@ -10,15 +10,15 @@ test.describe('Checkout Flow', () => {
 
   test('full checkout happy path', async ({ page }) => {
     // 1. Wait for products to load
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
 
     // 2. Add a product to cart
     await page.locator('button:has-text("Add to Cart")').first().click()
 
     // 3. Navigate to cart
-    await page.goto('/cart')
+    await page.locator('a[aria-label="Shopping cart"]').click()
     await expect(page.locator('text="Order Summary"')).toBeVisible()
 
     // 4. Click Checkout
@@ -43,12 +43,12 @@ test.describe('Checkout Flow', () => {
 
   test('shows validation errors on empty form submit', async ({ page }) => {
     // Add item and navigate to checkout
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
     await page.locator('button:has-text("Add to Cart")').first().click()
 
-    await page.goto('/cart')
+    await page.locator('a[aria-label="Shopping cart"]').click()
     await expect(page.locator('text="Order Summary"')).toBeVisible()
 
     await page.locator('a:has-text("Checkout")').click()

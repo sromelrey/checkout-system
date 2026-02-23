@@ -10,9 +10,9 @@ test.describe('Cart Management', () => {
 
   test('add product to cart and see badge update', async ({ page }) => {
     // Wait for products to load
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
 
     // Click the first "Add to Cart" button
     const addButton = page.locator('button:has-text("Add to Cart")').first()
@@ -24,13 +24,13 @@ test.describe('Cart Management', () => {
 
   test('navigate to cart page and see items', async ({ page }) => {
     // Wait for products to load and add an item
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
     await page.locator('button:has-text("Add to Cart")').first().click()
 
     // Navigate to cart
-    await page.goto('/cart')
+    await page.locator('a[aria-label="Shopping cart"]').click()
 
     // Should see cart items (not the empty message)
     await expect(page.locator('text="Order Summary"')).toBeVisible()
@@ -38,13 +38,13 @@ test.describe('Cart Management', () => {
 
   test('update item quantity in cart', async ({ page }) => {
     // Add a product first
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
     await page.locator('button:has-text("Add to Cart")').first().click()
 
     // Go to cart
-    await page.goto('/cart')
+    await page.locator('a[aria-label="Shopping cart"]').click()
     await expect(page.locator('text="Order Summary"')).toBeVisible()
 
     // The + button is inside the quantity controls flex div (.flex.items-center.gap-2)
@@ -63,13 +63,13 @@ test.describe('Cart Management', () => {
 
   test('remove item from cart', async ({ page }) => {
     // Add a product
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
     await page.locator('button:has-text("Add to Cart")').first().click()
 
     // Go to cart
-    await page.goto('/cart')
+    await page.locator('a[aria-label="Shopping cart"]').click()
     await expect(page.locator('text="Order Summary"')).toBeVisible()
 
     // Click the remove/trash button
@@ -84,15 +84,15 @@ test.describe('Cart Management', () => {
 
   test('clear entire cart', async ({ page }) => {
     // Add two products
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
     const addButtons = page.locator('button:has-text("Add to Cart")')
     await addButtons.nth(0).click()
     await addButtons.nth(1).click()
 
     // Go to cart
-    await page.goto('/cart')
+    await page.locator('a[aria-label="Shopping cart"]').click()
     await expect(page.locator('text="Order Summary"')).toBeVisible()
 
     // Click Clear Cart
