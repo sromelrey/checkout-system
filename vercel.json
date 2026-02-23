@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "framework": null,
+  "buildCommand": "pnpm build",
+  "outputDirectory": ".vercel/output",
+  "cleanUrls": true
+}
