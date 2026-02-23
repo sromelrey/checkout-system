@@ -10,9 +10,9 @@ test.describe('Cart Management', () => {
 
   test('add product to cart and see badge update', async ({ page }) => {
     // Wait for products to load
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
 
     // Click the first "Add to Cart" button
     const addButton = page.locator('button:has-text("Add to Cart")').first()

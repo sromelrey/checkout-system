@@ -11,6 +11,10 @@ export default defineConfig({
   globalSetup: './e2e/global-setup.ts',
   timeout: 30_000,
 
+  expect: {
+    timeout: 10_000,
+  },
+
   use: {
     actionTimeout: 10_000,
     baseURL: 'http://localhost:3000',

@@ -20,9 +20,9 @@ test.describe('Product Listing Page', () => {
   test('each product card shows title, price, and Add to Cart button', async ({
     page,
   }) => {
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
 
     const addToCartButtons = page.locator('button:has-text("Add to Cart")')
     await expect(addToCartButtons.first()).toBeVisible()
@@ -33,9 +33,9 @@ test.describe('Product Listing Page', () => {
 
   test('category filter narrows results', async ({ page }) => {
     // Wait for products to load
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
 
     // Look for a category filter select/dropdown
     const categorySelect = page.locator('select').first()
@@ -61,9 +61,9 @@ test.describe('Product Listing Page', () => {
 
   test('search filters products by title', async ({ page }) => {
     // Wait for products to load
-    await page.waitForSelector('button:has-text("Add to Cart")', {
-      timeout: 15000,
-    })
+    await expect(
+      page.locator('button:has-text("Add to Cart")').first(),
+    ).toBeVisible()
 
     const searchInput = page.locator('input[type="text"]').first()
     if (await searchInput.isVisible()) {

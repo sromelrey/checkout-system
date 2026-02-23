@@ -12,6 +12,8 @@ export default async function globalSetup() {
   )
 
   const server = createServer((req, res) => {
+    console.log(`[Mock API] Incoming request: ${req.method} ${req.url}`)
+
     // Enable CORS to match the real API
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET')
@@ -23,6 +25,7 @@ export default async function globalSetup() {
     }
 
     if (req.url === '/products') {
+      console.log(`[Mock API] Serving ${products.length} products`)
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify(products))
       return
@@ -30,6 +33,7 @@ export default async function globalSetup() {
 
     if (req.url === '/products/categories') {
       const categories = [...new Set(products.map((p: any) => p.category))]
+      console.log(`[Mock API] Serving ${categories.length} categories`)
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify(categories))
       return
@@ -37,6 +41,7 @@ export default async function globalSetup() {
 
     // Single product API
     if (req.url?.startsWith('/products/')) {
+      console.log(`[Mock API] Serving single product ${req.url}`)
       const id = req.url.split('/').pop()
       const product = products.find((p: any) => p.id === Number(id))
 
@@ -50,6 +55,7 @@ export default async function globalSetup() {
       return
     }
 
+    console.log(`[Mock API] Not found: ${req.url}`)
     res.writeHead(404)
     res.end()
   })
