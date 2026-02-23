@@ -55,6 +55,40 @@ export default async function globalSetup() {
       return
     }
 
+    // Cart operations
+    if (req.url && /^\/carts(\/|\?|$)/.test(req.url)) {
+      console.log(
+        `[Mock API] MATCHED /carts! Method: ${req.method}, URL: ${req.url}`,
+      )
+
+      if (req.method === 'POST') {
+        res.writeHead(201, { 'Content-Type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            id: 11,
+            userId: 1,
+            date: new Date().toISOString(),
+            products: [],
+          }),
+        )
+        return
+      }
+
+      if (
+        req.method === 'PATCH' ||
+        req.method === 'DELETE' ||
+        req.method === 'PUT'
+      ) {
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ id: 1, status: 'success' }))
+        return
+      }
+
+      console.log(
+        `[Mock API] Cart matched but method ${req.method} not handled.`,
+      )
+    }
+
     console.log(`[Mock API] Not found: ${req.url}`)
     res.writeHead(404)
     res.end()
