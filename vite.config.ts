@@ -10,11 +10,15 @@ import { nitro } from 'nitro/vite'
 
 const config = defineConfig({
   plugins: [
+    tanstackStart(),
     devtools(),
-    nitro({ preset: 'vercel', rollupConfig: { external: [/^@sentry\//] } }),
+    nitro({
+      preset: 'vercel',
+      compatibilityDate: '2024-11-01',
+      rollupConfig: { external: [/^@sentry\//] },
+    }),
     tsconfigPaths({ projects: ['./tsconfig.json'] }),
     tailwindcss(),
-    tanstackStart(),
     viteReact(),
   ],
 })
